@@ -9,6 +9,11 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <CaptureElement x:Name="VideoCapture" Stretch="UniformToFill"/>
+        <TextBlock HorizontalAlignment="Center" FontSize="36" Grid.Column="1" Height="200" x:Name="res"/>
     </Grid>
 </Page>
