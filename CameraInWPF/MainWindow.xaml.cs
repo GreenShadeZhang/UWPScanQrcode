@@ -13,6 +13,13 @@ using Windows.Storage.FileProperties;
 using Windows.Foundation;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Windows.Threading;
+using System.Threading.Tasks;
+using Windows.Media.FaceAnalysis;
+using System.Collections.Generic;
+using Windows.Media;
+using System.Windows.Shapes;
+using System.Windows.Media;
 
 namespace CameraInWPF
 {
@@ -21,8 +28,10 @@ namespace CameraInWPF
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        private DispatcherTimer _timer;
         private MediaCapture _mediaCapture;
         private CaptureElement _captureElement;
+        private FaceTracker faceTracker;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -43,8 +52,62 @@ namespace CameraInWPF
             InitializeComponent();
             imgCollection = new ObservableCollection<string>();
             DataContext = this;
+            InitVideoTimer();
+         
         }
 
+
+         private void InitVideoTimer()
+        {
+            _timer = new DispatcherTimer();
+            _timer.Interval = TimeSpan.FromSeconds(1);
+            _timer.Tick += _timer_Tick;
+            _timer.Start();
+        }
+
+
+        private async void _timer_Tick(object sender, object e)
+        {
+            try
+            {
+                this.FaceCanvas.Children.Clear();
+                IEnumerable<DetectedFace> faces = null;
+
+                // Create a VideoFrame object specifying the pixel format we want our capture image to be (NV12 bitmap in this case).
+                // GetPreviewFrame will convert the native webcam frame into this format.
+                const BitmapPixelFormat InputPixelFormat = BitmapPixelFormat.Nv12;
+                using (VideoFrame previewFrame = new VideoFrame(InputPixelFormat, 1280, 720))
+                {
+                    await this._mediaCapture.GetPreviewFrameAsync(previewFrame);
+
+                    // The returned VideoFrame should be in the supported NV12 format but we need to verify this.
+                    if (FaceDetector.IsBitmapPixelFormatSupported(previewFrame.SoftwareBitmap.BitmapPixelFormat))
+                    {
+                        faces = await this.faceTracker.ProcessNextFrameAsync(previewFrame);
+
+
+                    }
+
+                }
+                if(faces!=null)
+                {
+                    foreach (DetectedFace face in faces)
+                    {
+                        Face.Margin = new Thickness(face.FaceBox.X,face.FaceBox.Y,0,0);
+
+                        //faceBorder.ShowFaceRectangle(0, 0, (uint)(face.FaceBox.Width), (uint)(face.FaceBox.Height ));
+                        FaceText.Text = face.FaceBox.X.ToString() + face.FaceBox.Y.ToString();
+                    }
+                }
+               
+
+                PicBtn.Content = DateTime.Now.ToString();
+                  await Task.Delay(50);
+            }
+            catch (Exception)
+            {             
+            }
+        }
         public void PropertyChange(string propName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
@@ -106,6 +169,22 @@ namespace CameraInWPF
                     imgCollection.Add(file.Path);
                 }
             }
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+
+            if (_mediaCapture != null)
+            {
+                _mediaCapture.Dispose();
+
+                
+            }
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.faceTracker = await FaceTracker.CreateAsync();
         }
     }
 }

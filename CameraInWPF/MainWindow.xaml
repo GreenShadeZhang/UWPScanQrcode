@@ -6,6 +6,8 @@
         xmlns:xamlHost="clr-namespace:Microsoft.Toolkit.Wpf.UI.XamlHost;assembly=Microsoft.Toolkit.Wpf.UI.XamlHost"
         xmlns:local="clr-namespace:CameraInWPF"
         mc:Ignorable="d"
+        Loaded="Window_Loaded"
+        Closed="Window_Closed"
         Title="MainWindow" Height="450" Width="800">
     <Grid Background="Black">
         <Grid.ColumnDefinitions>
@@ -13,17 +15,25 @@
             <ColumnDefinition Width="20*" />
         </Grid.ColumnDefinitions>
 
-        <xamlHost:WindowsXamlHost Grid.Column="0" Margin="5"
-                                  x:Name="MyNavView"
-                                  Width="400"
-                                  Height="auto"
+        <Grid>
+          
+            <xamlHost:WindowsXamlHost Grid.Column="0" Margin="5"
+                                  x:Name="MyNavView"                            
                                   InitialTypeName="Windows.UI.Xaml.Controls.CaptureElement"
                                   ChildChanged="MyNavView_OnChildChanged"/>
+           
+            <Canvas Background="AliceBlue" x:Name="FaceCanvas">
+            </Canvas>
+            <Rectangle x:Name="Face" Fill="Red" Stroke="Red"
+                       Panel.ZIndex="4"
+                       Width="20" Height="20" Visibility="Visible"/>
+        </Grid>
 
         <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="5"
                       HorizontalScrollBarVisibility="Visible" Grid.Column="1">
             <StackPanel>
-                <Button Content="Capture" Click="Button_Click" Height="50"/>
+                <TextBlock x:Name="FaceText" Foreground="White" Text="ceshi" FontSize="36"/>
+                <Button Content="Capture" x:Name="PicBtn" Click="Button_Click" Height="50"/>
                 <ListView ItemsSource="{Binding imgCollection,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Margin="10" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True">
                     <ListView.ItemTemplate>
