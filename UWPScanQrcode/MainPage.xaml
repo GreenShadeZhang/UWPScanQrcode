@@ -14,6 +14,24 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <CaptureElement x:Name="VideoCapture" Stretch="UniformToFill"/>
-        <TextBlock HorizontalAlignment="Center" FontSize="36" Grid.Column="1" Height="200" x:Name="res"/>
+        <StackPanel Grid.Column="1">
+            <TextBlock HorizontalAlignment="Center" FontSize="36"  Height="200" x:Name="res"/>
+            <TextBlock x:Name="Noti" Margin="20"/>
+            <Button x:Name="GetPrinter"
+                    Content="获取打印机"
+                    FontSize="36"
+                    Margin="20"
+                    Click="GetPrinter_Click"/>
+            <ComboBox x:Name="PrintList" Width="200"
+                      Height="60"
+                      Margin="20"                      
+                      ></ComboBox>
+            <Button x:Name="PrintDoc"
+                    Content="打印"
+                    FontSize="36"
+                    Margin="20"
+                    Click="PrintDoc_Click"/>
+        </StackPanel>
+       
     </Grid>
 </Page>

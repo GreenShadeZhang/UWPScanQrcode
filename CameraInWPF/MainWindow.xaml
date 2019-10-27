@@ -27,6 +27,9 @@
             <Rectangle x:Name="Face" Fill="Red" Stroke="Red"
                        Panel.ZIndex="4"
                        Width="20" Height="20" Visibility="Visible"/>
+            <Rectangle x:Name="Face1" Fill="Red" Stroke="Red"
+                       Panel.ZIndex="4"
+                       Width="20" Height="20" Visibility="Visible"/>
         </Grid>
 
         <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="5"

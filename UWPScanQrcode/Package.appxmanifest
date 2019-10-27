@@ -1,5 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3" IgnorableNamespaces="uap mp uap3">
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" 
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" 
+         xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3" 
+         IgnorableNamespaces="uap mp uap3">
   <Identity Name="4e75c908-cbcd-4cb3-98d3-07efc39064be" Publisher="CN=Gil_Z" Version="1.0.0.0" />
   <mp:PhoneIdentity PhoneProductId="4e75c908-cbcd-4cb3-98d3-07efc39064be" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>

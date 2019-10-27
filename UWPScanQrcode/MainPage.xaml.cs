@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
+using Windows.ApplicationModel.AppService;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -14,6 +15,7 @@ using Windows.Media.Capture;
 using Windows.Media.Devices;
 using Windows.Media.MediaProperties;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -57,12 +59,53 @@ namespace UWPScanQrcode
                 deferral.Complete();
             }
         }
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
             InitVideoCapture();
-        }
+            // Make sure the BackgroundProcess is in your AppX folder, if not rebuild the solution
+            await Windows.ApplicationModel.FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
+            try
+            {
 
+                // ValueSet valueSet = new ValueSet();
+                // valueSet.Add("request", "open ok");
+                await Task.Delay(500);
+                if (App.Connection != null)
+                {
+                    App.Connection.RequestReceived += Connection_RequestReceived1;
+                    // AppServiceResponse response = await App.Connection.SendMessageAsync(valueSet);
+                    // MessageRecevied.Text = "Received response: " + response.Message["response"] as string;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageDialog dialog = new MessageDialog("Rebuild the solution and make sure the BackgroundProcess is in your AppX folder");
+                await dialog.ShowAsync();
+            }
+
+        }
+        private async void Connection_RequestReceived1(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)
+        {
+            if (args.Request.Message?.Count > 0)
+            {
+                foreach (var message in args.Request.Message)
+                {
+                    switch (message.Key)
+                    {
+                        case "response":
+                            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                            {
+                                Noti.Text = message.Value?.ToString();
+                            });
+                           
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
         private async Task CleanupCameraAsync()
         {
             if (_isPreviewing)
@@ -81,7 +124,7 @@ namespace UWPScanQrcode
         {
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(1);
-            _timer.Tick += _timer_Tick;
+            _timer.Tick += Timer_Tick;
             _timer.Start();
         }
 
@@ -97,7 +140,7 @@ namespace UWPScanQrcode
             });
         }
 
-        private async void _timer_Tick(object sender, object e)
+        private async void Timer_Tick(object sender, object e)
         {
             try
             {
@@ -213,6 +256,43 @@ namespace UWPScanQrcode
             }
             catch (Exception)
             {
+            }
+        }
+
+        private async void GetPrinter_Click(object sender, RoutedEventArgs e)
+        {
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("request","");
+
+            if (App.Connection != null)
+            {
+                AppServiceResponse response = await App.Connection.SendMessageAsync(valueSet);
+                Noti.Text = "Received response: " + response.Message["response"] as string;
+                if (!string.IsNullOrEmpty((string)response.Message["response"]) && ((string)response.Message["response"]).Contains("Print"))
+                {
+                    Noti.Text = "获取打印机列表成功";
+                    string res = response.Message["response"] as string;
+                    List<string> pr = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(res);
+                    PrintList.ItemsSource = pr;
+                }
+
+            }
+        }
+
+        private async void PrintDoc_Click(object sender, RoutedEventArgs e)
+        {
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("print", (string)PrintList.SelectedItem);
+
+            if (App.Connection != null)
+            {
+                AppServiceResponse response = await App.Connection.SendMessageAsync(valueSet);
+                //Noti.Text = "Received response: " + response.Message["response"] as string;
+                //if (!string.IsNullOrEmpty((string)response.Message["response"]) && ((string)response.Message["response"]).Contains("ok"))
+                //{
+                //    Noti.Text = "打印成功";
+                //}
+
             }
         }
     }

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.AppService;
+using Windows.ApplicationModel.Background;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -22,6 +24,9 @@ namespace UWPScanQrcode
     /// </summary>
     sealed partial class App : Application
     {
+        public static AppServiceConnection Connection = null;
+
+        BackgroundTaskDeferral appServiceDeferral = null;
         /// <summary>
         /// 初始化单一实例应用程序对象。这是执行的创作代码的第一行，
         /// 已执行，逻辑上等同于 main() 或 WinMain()。
@@ -31,7 +36,33 @@ namespace UWPScanQrcode
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }
+        /// <summary>
+        /// Initializes the app service on the host process 
+        /// </summary>
+        protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
+        {
+            base.OnBackgroundActivated(args);
+            if (args.TaskInstance.TriggerDetails is AppServiceTriggerDetails)
+            {
+                appServiceDeferral = args.TaskInstance.GetDeferral();
+                args.TaskInstance.Canceled += OnTaskCanceled; // Associate a cancellation handler with the background task.
 
+                AppServiceTriggerDetails details = args.TaskInstance.TriggerDetails as AppServiceTriggerDetails;
+                Connection = details.AppServiceConnection;
+
+            }
+        }
+        /// <summary>
+        /// Associate the cancellation handler with the background task 
+        /// </summary>
+        private void OnTaskCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
+        {
+            if (this.appServiceDeferral != null)
+            {
+                // Complete the service deferral.
+                this.appServiceDeferral.Complete();
+            }
+        }
         /// <summary>
         /// 在应用程序由最终用户正常启动时进行调用。
         /// 将在启动应用程序以打开特定文件等情况下使用。
